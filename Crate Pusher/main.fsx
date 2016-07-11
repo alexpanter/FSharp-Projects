@@ -1,4 +1,6 @@
 // This is the main file of the game Crate Pusher.
+// Here all assets are imported and attached to
+// drawing functions and handlers.
 
 open System.Drawing
 open System.Windows.Forms
@@ -70,25 +72,22 @@ let updateMap((i,j): int * int, (x,y): int * int) =
         //behind the crate is either an empty space.
         | (2,0) -> l.[i+y,j+x] <- 5
                    l.[i+y+y,j+x+x] <- 2
-                   l.[i,j] <- 0
         //if there is a target behind the crate
-        | (2,3) -> l.[i,j] <- 0
-                   l.[i+y,j+x] <- 5
+        | (2,3) -> l.[i+y,j+x] <- 5
                    l.[i+y+y,j+x+x] <- 2
                    targetSpots <- (i+y+y,j+x+x) :: targetSpots
         | (2,_) -> ()
         //will move the player to an empty space
-        | (0,_) ->
-            if l.[i,j] = 4 then
-                l.[i,j] <- 3
-            else
-                l.[i,j] <- 0
-            l.[i+y,j+x] <- 5
+        | (0,_) -> l.[i+y,j+x] <- 5
         //will move the player to a target
         | (3,_) -> l.[i+y,j+x] <- 4
-                   l.[i,j] <- 0
                    targetSpots <- (i+y,j+x) :: targetSpots
         | _ as k -> failwithf "updateMap received illegal input: %A" k
+    //updating the player's spot
+    if l.[i,j] = 4 then
+        l.[i,j] <- 3
+    else 
+        l.[i,j] <- 0
     let mutable tempList = []
     for spot in targetSpots do
         if l.[fst spot,snd spot] = 0 then
@@ -98,13 +97,12 @@ let updateMap((i,j): int * int, (x,y): int * int) =
         else
             tempList <- (fst spot,snd spot) :: tempList
     targetSpots <- tempList
-// INVESTIGATE: (5,2,3)
     
 
 
 
 // handlers defined for the main form
-f.KeyUp.AddHandler(new KeyEventHandler
+f.KeyDown.AddHandler(new KeyEventHandler
     (fun s e ->
          let i,j = !coordinate
          let x,y = !direction
@@ -191,4 +189,3 @@ f.Paint.Add(fun e ->
 
 // Running the application
 Application.Run(f)
-
