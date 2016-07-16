@@ -9,4 +9,4 @@ A remake of the classis game Sokoban.
 A terminal-driven calender app.
 
 *  **Settlers**:  
-A pc version of the board game "The Settlers of Catan". (work in progress)
+PC version of the board game "The Settlers of Catan". (work in progress)
