@@ -78,4 +78,4 @@ let calcPoints =
 
 
 // testing
-List.iter (fun x -> printfn "%A" x) (generateBoard(100))
+//List.iter (fun x -> printfn "%A" x) (generateBoard(100))

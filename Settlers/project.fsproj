@@ -49,10 +49,14 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
 	<Reference Include="System.Drawing" />
+	<Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="main.fsx" />
-    <Compile Include="hexagonBoard.fs" />
+	<Compilde Include="drawingPanel.fsx" />
+	<Compile Include="hexagonBoard.fs" />
+	<Compile Include="mouseClickCheck.fs" />
+	<Compile Include="applicationForm.fsx" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '11.0'">
