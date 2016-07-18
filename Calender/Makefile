@@ -3,14 +3,11 @@
 MAIN=main.fsx
 FILES=classes.fs control.fsx messages.fs
 LIB=libcal.dll
-OUT=calender
+OUT=calender.exe
 
-libs: ${FILES} ${LIB}
+libs:
 	fsharpc -o ${LIB} -a ${FILES}
 
-build: ${LIB} ${OUT}
-	fsharpc ${LIB} -o ${OUT}
+build: ${LIB}
+	fsharpc -r ${LIB} -o ${OUT} ${MAIN}
 
-test: ${MAIN}
-	fsharpc -o $@.exe ${MAIN}
-	mono test.exe

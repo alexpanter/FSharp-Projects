@@ -22,7 +22,6 @@ type Task(start: int * int, stop: int * int, description: string) = class
     member this.StartTime = startTime
     member this.StopTime = stopTime
     member this.Description = description
-
 end
 
 
@@ -50,22 +49,25 @@ type Day(dayText: string) = class
 
     member this.getPrintFormat() =
         [ for i = 1 to tasks.Count do yield (i,tasks.[i-1]) ]
-            
-        
 end
 
 
 
-type Week() = class
+type Week(weekNumber: int, yearNumber: int) = class
 
-    let mutable path = ""
-    let monday = new Day("monday")
-    let tuesday = new Day("tuesday")
-    let wednesday = new Day("wednesday")
-    let thursday = new Day("thursday")
-    let friday = new Day("friday")
-    let saturday = new Day("saturday")
-    let sunday = new Day("sunday")
+    let path =
+        (__SOURCE_DIRECTORY__,"data",string yearNumber)
+        |> IO.Path.Combine
+        
+    let file = string weekNumber
+    
+    let monday = new Day("Monday")
+    let tuesday = new Day("Tuesday")
+    let wednesday = new Day("Wednesday")
+    let thursday = new Day("Thursday")
+    let friday = new Day("Friday")
+    let saturday = new Day("Saturday")
+    let sunday = new Day("Sunday")
 
     member this.Monday = monday
     member this.Tuesday = tuesday
@@ -74,23 +76,21 @@ type Week() = class
     member this.Friday = friday
     member this.Saturday = saturday
     member this.Sunday = sunday
-
+    
     member this.getDay(day: string) =
         match day with
             | "monday"    | "Monday"    | "1" -> monday
             | "tuesday"   | "Tuesday"   | "2" -> tuesday
             | "wednesday" | "Wednesday" | "3" -> wednesday
-            | "thursday"  | "Thursday"    | "4" -> thursday
+            | "thursday"  | "Thursday"  | "4" -> thursday
             | "friday"    | "Friday"    | "5" -> friday
             | "saturday"  | "Saturday"  | "6" -> saturday
             | "sunday"    | "Sunday"    | "0" | "7" -> sunday
             | _ as k ->
                 failwithf "Week.getDay(): The day %s does not exist" k
-
-    member this.Path
-        with get() = path
-        and set(s: string) = path <- s
-            
+    
+    member this.Path = path
+    member this.File = file         
 end
 
 
@@ -98,14 +98,19 @@ end
 // The CalenderSerializer is used to serialize and deserialize all
 // data being used in the application
 type CalenderSezializer() = class
-    static member Serialize(input: obj, path: string) =
+    static member Serialize(w: Week) =
         let formatter = Binary.BinaryFormatter()
-        use stream = new IO.FileStream(path, IO.FileMode.Create)
-        formatter.Serialize(stream, input)
+        if not (IO.Directory.Exists(w.Path)) then
+            IO.Directory.CreateDirectory(w.Path)
+            |> ignore
+        let target = IO.Path.Combine(w.Path,w.File)
+        use stream = new IO.FileStream(target, IO.FileMode.Create)
+        formatter.Serialize(stream, w |> box)
 
-    static member Deserialize(path: string) =
+    static member internal Deserialize(path,file) =
         try
-            use stream = new IO.FileStream(path, IO.FileMode.Open)
+            let target = IO.Path.Combine(path,file)
+            use stream = new IO.FileStream(target, IO.FileMode.Open)
             let formatter = Binary.BinaryFormatter()
             Some(formatter.Deserialize(stream))
         with
