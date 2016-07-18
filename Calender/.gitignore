@@ -1,0 +1,7 @@
+# ignoring bin and obj folders
+bin/
+obj/
+
+# ignoring the data folder since it contains private information
+data/
+

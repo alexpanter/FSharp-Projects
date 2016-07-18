@@ -1,15 +1,11 @@
 open System
 
-#load "messages.fs"
-#load "control.fsx"
+#r "libcal.dll"
 open calender
 
-
+let source = __SOURCE_DIRECTORY__
 let menu0 = "main"
-let menu10 = "this week"
-let menu11 = "next week"
-let menu12(i: int) = String.Format("week {0}",i)
-let menu2(dayOfWeek: string) = String.Format("{0}",dayOfWeek)
+
 
 let userInput(s: string) =
     Console.ForegroundColor <- ConsoleColor.Blue
@@ -20,48 +16,52 @@ let userInput(s: string) =
 
 
 
-let taskAddMode(day: classes.Day, weekText: string) =
-    let startHour = ref 0
-    let startMinute = ref 0
-    let stopHour = ref 0
-    let stopMinute = ref 0
+let taskAddMode(day: classes.Day) =
+    let mutable startHour = 0
+    let mutable startMinute = 0
+    let mutable stopHour = 0
+    let mutable stopMinute = 0
     let b = ref false
+    
     // start hour
     while not !b do
         printf "Write the start hour: "
         try
-            startHour := Int32.Parse <| Console.ReadLine()
-            if not (!startHour < 0 || !startHour > 23) then
+            startHour <- Int32.Parse <| Console.ReadLine()
+            if not (startHour < 0 || startHour > 23) then
                 b := true
         with
             | _ -> printf ""
     b := false
+    
     // start minute
     while not !b do
         printf "Write the start minute: "
         try
-            startMinute := Int32.Parse <| Console.ReadLine()
-            if not (!startMinute < 0 || !startMinute > 59) then
+            startMinute <- Int32.Parse <| Console.ReadLine()
+            if not (startMinute < 0 || startMinute > 59) then
                 b := true
         with
             | _ -> printf ""
     b := false
+    
     // stop hour
     while not !b do
         printf "Write the stop hour: "
         try
-            stopHour := Int32.Parse <| Console.ReadLine()
-            if not (!stopHour < 0 || !stopHour > 23) then
+            stopHour <- Int32.Parse <| Console.ReadLine()
+            if not (stopHour < 0 || stopHour > 23) then
                 b := true
         with
             | _ -> printf ""
     b := false
+    
     // stop minute
     while not !b do
         printf "Write the stop minute: "
         try
-            stopMinute := Int32.Parse <| Console.ReadLine()
-            if not (!stopMinute < 0 || !stopMinute > 59) then
+            stopMinute <- Int32.Parse <| Console.ReadLine()
+            if not (stopMinute < 0 || stopMinute > 59) then
                 b := true
         with
             | _ -> printf ""
@@ -73,7 +73,7 @@ let taskAddMode(day: classes.Day, weekText: string) =
         if !s <> "" then
             b := true
 
-    let t = new classes.Task((!startHour,!startMinute),(!stopHour,!stopMinute),!s)
+    let t = new classes.Task((startHour,startMinute),(stopHour,stopMinute),!s)
     if day.AddTask(t) then
         Console.WriteLine("The task has now been added.\n")
     else
@@ -82,12 +82,12 @@ let taskAddMode(day: classes.Day, weekText: string) =
 
 
 
-let taskRemoveMode(day: classes.Day, weekText: string) =
+let taskRemoveMode(day: classes.Day) =
     let tl = day.getPrintFormat()
     if tl.Length < 1 then
-        messages.printNoTasks(weekText + "/" + day.DayText)
+        messages.printNoTasks(day.DayText)
     else
-        messages.printTasks(weekText + "/" + day.DayText)
+        messages.printTasks(day.DayText)
         for (i,t) in tl do
             let start = t.StartTime.ToString()
             let stop = t.StopTime.ToString()
@@ -110,29 +110,30 @@ let taskRemoveMode(day: classes.Day, weekText: string) =
 
 
 
-let dayMode(day: classes.Day, weekText: string) =
+let dayMode(day: classes.Day, prompt: string) =
+    let newprompt = prompt + "/" + day.DayText
 
     let rec runDay() =
-        userInput(menu0 + "/" + weekText + "/" + day.DayText)
+        userInput(newprompt)
         match Console.ReadLine() with
             | "1" | "show" ->
                 let tl = day.getPrintFormat()
                 if tl.Length > 0 then
-                    messages.printTasks(weekText + "/" + day.DayText)
+                    messages.printTasks(day.DayText)
                     for (i,t) in tl do
                         let start = t.StartTime.ToString()
                         let stop = t.StopTime.ToString()
                         printfn "%i)  (%s - %s) %s" i start stop t.Description
                 else
-                    messages.printNoTasks(weekText + "/" + day.DayText)
+                    messages.printNoTasks(day.DayText)
                 runDay()
             //add a new task
             | "2" | "add" ->
-                taskAddMode(day, weekText)
+                taskAddMode(day)
                 runDay()
             //remove an existing task
             | "3" | "remove" ->
-                taskRemoveMode(day, weekText)
+                taskRemoveMode(day)
                 runDay()
             //print the menu
             | "menu" ->
@@ -154,53 +155,55 @@ let dayMode(day: classes.Day, weekText: string) =
 
 
 
-let weekMode(w: classes.Week, weekText: string) =
-
+let weekMode(w: classes.Week, prompt: string) =
+    let y = w.Path.Substring(w.Path.Length-4,4)
+    let newprompt = prompt + "/" + y + "/Week " + w.File
+    
     let rec runWeek() =
-        userInput(menu0 + "/" + weekText)
+        userInput(newprompt)
         match Console.ReadLine() with
             //monday
-            | "1" | "monday" as k->
-                let monday = w.getDay(k)
-                dayMode(monday,weekText)
+            | "1" | "monday" ->
+                let monday = w.Monday
+                dayMode(monday,newprompt)
                 runWeek()
             //tuesday
-            | "2" | "tuesday" as k->
-                let tuesday = w.getDay(k)
-                dayMode(tuesday,weekText)
+            | "2" | "tuesday" ->
+                let tuesday = w.Tuesday
+                dayMode(tuesday,newprompt)
                 runWeek()
             //wednesday
-            | "3" | "wednesday" as k->
-                let wednesday = w.getDay(k)
-                dayMode(wednesday,weekText)
+            | "3" | "wednesday" ->
+                let wednesday = w.Wednesday
+                dayMode(wednesday,newprompt)
                 runWeek()
             //thursday
-            | "4" | "thursday" as k->
-                let thursday = w.getDay(k)
-                dayMode(thursday,weekText)
+            | "4" | "thursday" ->
+                let thursday = w.Thursday
+                dayMode(thursday,newprompt)
                 runWeek()
             //friday
-            | "5" | "friday" as k->
-                let friday = w.getDay(k)
-                dayMode(friday,weekText)
+            | "5" | "friday" ->
+                let friday = w.Friday
+                dayMode(friday,newprompt)
                 runWeek()
             //saturday
-            | "6" | "saturday" as k->
-                let saturday = w.getDay(k)
-                dayMode(saturday,weekText)
+            | "6" | "saturday" ->
+                let saturday = w.Saturday
+                dayMode(saturday,newprompt)
                 runWeek()
             //sunday
-            | "7" | "sunday" as k->
-                let sunday = w.getDay(k)
-                dayMode(sunday,weekText)
+            | "7" | "sunday" ->
+                let sunday = w.Sunday
+                dayMode(sunday,newprompt)
                 runWeek()
             //show all days
-            | "8" as k ->
+            | "8" ->
                 ()
                 runWeek()
             | "9" | "today" ->
                 let today = control.today()
-                dayMode(w.getDay(today),weekText)
+                dayMode(w.getDay(today),newprompt)
                 runWeek()
             //print the menu
             | "menu" ->
@@ -223,68 +226,135 @@ let weekMode(w: classes.Week, weekText: string) =
 
 
 
-let main() =
 
+let pickADay() =
+    let mutable dayNumber = 0
+    let mutable monthNumber = 0
+    let mutable yearNumber = control.thisYear()
+    let b = ref false
+    
+    // year number
+    while not !b do
+        printf "Write the year number (default is %i): "
+            (control.thisYear())
+        let input = Console.ReadLine()
+        if input <> "" then
+            try
+                yearNumber <- Int32.Parse(input)
+                if (yearNumber >= 2016 && yearNumber < 2099) then
+                    b := true
+            with
+                | _ -> printf ""
+        else
+            b := true
+    b := false
+    
+    // month number
+    while not !b do
+        b := true
+        printf "Write the month (number or string): "
+        match Console.ReadLine() with
+            | "january"   | "January"   | "1" -> monthNumber <- 1
+            | "february"  | "February"  | "2" -> monthNumber <- 2
+            | "march"     | "March"     | "3" -> monthNumber <- 3
+            | "april"     | "April"     | "4" -> monthNumber <- 4
+            | "may"       | "May"       | "5" -> monthNumber <- 5
+            | "june"      | "June"      | "6" -> monthNumber <- 6
+            | "july"      | "July"      | "7" -> monthNumber <- 7
+            | "august"    | "August"    | "8" -> monthNumber <- 8
+            | "september" | "September" | "9" -> monthNumber <- 9
+            | "october"   | "October"   | "10" -> monthNumber <- 10
+            | "november"  | "November"  | "11" -> monthNumber <- 11
+            | "december"  | "December"  | "12" -> monthNumber <- 12
+            | _ -> b := false; printf ""
+    b := false
+    
+    // day number
+    let maxDay = DateTime.DaysInMonth(yearNumber,monthNumber)
+    while not !b do
+        printf "Write the day number (1-%i): " maxDay
+        try
+            dayNumber <- Int32.Parse <| Console.ReadLine()
+            if (dayNumber > 0 && dayNumber <= maxDay) then
+                b := true
+        with
+            | _ -> printf ""
+
+    DateTime(yearNumber,monthNumber,dayNumber)
+
+
+
+
+
+
+
+
+let main() =
     //displays welcome message to the user
     messages.welcome()
+    let prompt = menu0
 
     let rec runMain() =
-        userInput(menu0)
+        userInput(prompt)
         match Console.ReadLine() with
             //this week
             | "1" | "this week" ->
                 let mutable w = Unchecked.defaultof<classes.Week>
-                let n = control.thisWeek() |> string
                 try
-                    w <- Option.get(control.getWeek())
+                    w <- Option.get(control.getThisWeek())
                 with
                     | _ ->
-                        w <- new classes.Week()
-                        let path =
-                            ("data",control.year() |> string,n)
-                            |> IO.Path.Combine
-                        w.Path <- path
-                weekMode(w,"week " + n)
-                classes.CalenderSezializer.Serialize(box w,w.Path)
+                        w <- new classes.Week(control.thisWeek(),
+                                              control.thisYear())
+                weekMode(w,prompt)
+                classes.CalenderSezializer.Serialize(w)
                 runMain()
             //next week
             | "2" | "next week" ->
                 let mutable w = Unchecked.defaultof<classes.Week>
-                let n = control.nextWeek() |> string
                 try
                     w <- Option.get(control.getNextWeek())
                 with
                     | _ ->
-                        w <- new classes.Week()
-                        let path =
-                            ("data",control.year() |> string,n)
-                            |> IO.Path.Combine
-                        w.Path <- path
-                weekMode(w,"week " + n)
-                classes.CalenderSezializer.Serialize(box w,w.Path)
+                        w <- new classes.Week(control.nextWeek(),
+                                              control.nextWeeksYear())
+                weekMode(w,prompt)
+                classes.CalenderSezializer.Serialize(w)
                 runMain()
             //enter a week number
             | "3" ->
                 try
                     userInput("please enter a week number:")
-                    let n = Int32.Parse(Console.ReadLine())
-                    if control.isWeekNumValid(n) then
+                    let weekNumber = Int32.Parse(Console.ReadLine())
+                    if control.isWeekNumberValid(weekNumber) then
                         let mutable w = Unchecked.defaultof<classes.Week>
-                        match control.getWeekFromBinary(n) with
+                        match control.getNumberWeek(weekNumber) with
                             | Some(x) ->
                                 w <- x
                             | None ->
-                                w <- new classes.Week()
-                        let path =
-                            ("data",
-                             control.year() |> string,
-                             n |> string)
-                            |> IO.Path.Combine
-                        w.Path <- path
-                        weekMode(w,"week " + (string n))
-                        classes.CalenderSezializer.Serialize(box w,w.Path)
+                                w <- new classes.Week(weekNumber,
+                                                      control.thisYear())
+                        weekMode(w,prompt)
+                        classes.CalenderSezializer.Serialize(w)
                 with
                     | _ -> ()
+                runMain()
+            //pick a day
+            | "4" ->
+                let dateTime = pickADay()
+                let mutable w = Unchecked.defaultof<classes.Week>
+                match control.getWeekFromDateTime(dateTime) with
+                    | Some(x) -> w <- x
+                    | None ->
+                        let week = control.weekFromDateTime(dateTime)
+                        let y = if dateTime.Month = 1 && week > 50 then
+                                    dateTime.Year - 1
+                                elif dateTime.Month = 12 && week < 3 then
+                                    dateTime.Year + 1
+                                else dateTime.Year
+                        w <- new classes.Week(week,y)
+                weekMode(w,prompt)
+                classes.CalenderSezializer.Serialize(w)
                 runMain()
             //print the menu
             | "menu" ->

@@ -42,6 +42,7 @@ let showMainMenu() =
      "1)  this week";
      "2)  next week";
      "3)  enter a week number";
+     "4)  pick a day";
      "0)  exit";
      ""]
     |> print
