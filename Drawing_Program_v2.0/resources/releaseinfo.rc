@@ -1,0 +1,25 @@
+/*
+This is the resource file for the Shadow Draw v. 2.0 Project.
+To compile: 'rc releaseinfo.rc' -> releaseinfo.res
+
+FOR A LIST OF AVAILABLE COMMANDS FOR THE WINDOWS RESOURCE FILE FORMAT (.rc),
+PLEASE VISIT THE FOLLOWING LINK:
+https://msdn.microsoft.com/en-us/library/windows/desktop/aa381043%28v=vs.85%29.aspx
+*/
+
+// Can this macro invocation be omitted?
+#define shadowDrawIcon 3000
+
+shadowDrawIcon ICON "logo.ico"
+/*
+shadowDrawVersion VERSIONINFO
+//fixed-info
+BEGIN
+	FILEVERSION 0,00,0,01
+	FILEFLAGS VS_FF_PRERELEASE
+	FILEOS VOS_WINDOWS32
+	FILETYPE VFT_APP
+//	LangID 0x0409
+//	charsetID 1200
+END
+*/

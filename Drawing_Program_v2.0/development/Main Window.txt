@@ -1,0 +1,24 @@
+The main window should contain some kind of object, which characteristics are:
+	- a list(dynamic array) of all created shapes.
+	    These should each have a button for:
+	  	- changing the name of the shape
+		- more to foreground/background (forward/back one layer)
+		- manipulating the shape (rotate, scale, move, color, etc.)
+		- delete the shape
+		- show/hide the shape
+		- lock/unlock the shape (safety against unwanted editing)
+
+
+### How to best store/access information on each drawed shape? ###
+Some kind of object.
+Active shape (the list of shapes needs to know this, and perhaps visually enhanced in the main frame as well.)
+
+
+
+
+### How to implement undo/redo options? ###
+Using stack technology, multiple stacks
+Each time an action is performed it is stored on the 'undo stack'.
+When the user undoes an action it is stored on the 'redo stack'.
+# Probably not need to worry about this until the development reaches
+# a critical point.
