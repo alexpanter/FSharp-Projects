@@ -1,9 +1,9 @@
 // reading all custom files
 // only included for Visual Studio autocompletion
 // the 'Makefile' includes them in the compiling commands
-#r "lib\drawing.dll"
-#r "lib\graphics.dll"
-#r "lib\instance.dll"
+#r "lib/drawing.dll"
+#r "lib/graphics.dll"
+#r "lib/instance.dll"
 
 // Creating the program instance containg all necessary subtypes
 let main() =
